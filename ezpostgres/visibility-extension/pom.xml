@@ -48,6 +48,7 @@
                             <option>-Wall</option>
                             <option>-Wextra</option>
                             <option>-Werror</option>
+                            <option>-I/usr/pgsql-9.2/include/server</option>
                         </options>
                     </c>
                     <libraries>
