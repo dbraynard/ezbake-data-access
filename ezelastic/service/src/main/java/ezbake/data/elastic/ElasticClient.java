@@ -72,6 +72,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.ScriptFilterBuilder;
 import org.elasticsearch.indices.IndexMissingException;
+import static org.elasticsearch.script.ScriptService.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -357,7 +358,7 @@ public final class ElasticClient implements DocumentStore {
         final UpdateRequestBuilder updateRequest =
                 client.prepareUpdate(indexName, id.getType(), id.getId()).setRefresh(true);
 
-        updateRequest.setScript(script.getScript());
+        updateRequest.setScript(script.getScript(), ScriptType.INLINE);
         if (script.isSetParameters()) {
             for (final Map.Entry<String, String> entry : script.getParameters().entrySet()) {
                 updateRequest.addScriptParam(entry.getKey(), entry.getValue());

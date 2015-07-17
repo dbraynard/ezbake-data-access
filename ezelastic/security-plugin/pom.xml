@@ -92,7 +92,7 @@
                             <repackJars>false</repackJars>
                             <requires combine.self="override">
                                 <require>jre &gt;= 1.7.0</require>
-                                <require>elasticsearch = 1.2.1</require>
+                                <require>elasticsearch = 1.3.4</require>
                             </requires>
                             <mappings combine.self="override">
                                 <mapping>
