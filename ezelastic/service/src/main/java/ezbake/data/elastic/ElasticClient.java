@@ -745,7 +745,10 @@ public final class ElasticClient implements DocumentStore {
 
     @Override
     public boolean ping() {
-        return isClusterHealthy(client);
+	logger.trace("received ping. pinging");
+        boolean result = isClusterHealthy(client);
+	logger.trace("returning result: {}", result);
+	return result;
     }
 
     @Override

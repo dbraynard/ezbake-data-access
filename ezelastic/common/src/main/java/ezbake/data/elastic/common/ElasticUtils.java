@@ -20,9 +20,14 @@ import java.util.Set;
 
 import org.apache.thrift.TException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.AdminClient;
+import org.elasticsearch.client.ClusterAdminClient;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -37,6 +42,9 @@ import org.elasticsearch.search.sort.GeoDistanceSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -60,6 +68,8 @@ public final class ElasticUtils {
     public static final String PERCOLATOR_TYPE = ".percolator";
 
     public static final String VISIBILITY_FIELD = "ezbake_visibility";
+
+    private static final Logger logger = LoggerFactory.getLogger(ElasticUtils.class);
 
     private ElasticUtils() {
     }
@@ -197,7 +207,17 @@ public final class ElasticUtils {
     }
 
     public static boolean isClusterHealthy(Client client) {
-        final ClusterHealthStatus status = client.admin().cluster().prepareHealth().get().getStatus();
+	logger.trace("checking cluster health: getting admin client. ");
+	AdminClient adminClient = client.admin();
+	logger.trace("checking cluster health: getting admin cluster client.");
+	ClusterAdminClient clusterAdminClient = adminClient.cluster();
+	logger.trace("checking cluster health: getting builder.");
+	ClusterHealthRequestBuilder builder = clusterAdminClient.prepareHealth();
+	logger.trace("checking cluster health: getting response.");
+	ClusterHealthResponse response = builder.get();
+	logger.trace("checking cluster health: getting status.");
+	final ClusterHealthStatus status = response.getStatus();
+
         return status == ClusterHealthStatus.YELLOW || status == ClusterHealthStatus.GREEN;
     }
 
