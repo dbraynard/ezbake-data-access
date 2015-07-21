@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.index.fielddata.ScriptDocValues;
+import static org.elasticsearch.index.fielddata.ScriptDocValues.Strings;
 import org.elasticsearch.script.AbstractSearchScript;
 
 import com.google.common.base.Function;
@@ -128,13 +129,13 @@ public final class EzSecurityVisibilityFilter extends AbstractSearchScript {
     }
 
     private String getStringField(String fieldName) {
-        final ScriptDocValues docValues = (ScriptDocValues) doc().get(fieldName);
+        final Strings docValues = (Strings) doc().get(fieldName);
         if (docValues == null) {
             logger.warn("Document didn't contain '" + fieldName + '\'');
             return null;
         }
 
-        final List<?> values = docValues.getValues();
+        final List<String> values = docValues.getValues();
         if (values == null || values.isEmpty()) {
             logger.warn("Document contained no values in '" + fieldName + '\'');
             return null;
