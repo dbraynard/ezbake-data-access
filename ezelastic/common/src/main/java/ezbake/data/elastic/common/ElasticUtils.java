@@ -148,7 +148,7 @@ public final class ElasticUtils {
         // Value
         final GeoSortValue geoVal = geoDistanceSort.getValue();
         if (geoVal.isSet(GeoSortValue._Fields.GEO_HASH)) {
-            gs.geohash(geoVal.getGeoHash());
+            gs.geohashes(geoVal.getGeoHash());
         } else {
             gs.point(geoVal.getCoordinate().getLatitude(), geoVal.getCoordinate().getLongitude());
         }
