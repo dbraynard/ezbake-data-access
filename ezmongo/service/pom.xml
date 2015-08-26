@@ -111,68 +111,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>rpm-maven-plugin</artifactId>
-                        <configuration>
-                            <name>ezbake-${project.artifactId}</name>
-                            <description>${project.name} RPM</description>
-                            <license>ASL 2.0</license>
-                            <provides>
-                                <provide>ezbake-mongo-imp = 2.1</provide>
-                            </provides>
-                            <mappings combine.self="override">
-                                <mapping>
-                                    <directory>/opt/ezbake</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>755</filemode>
-                                    <directoryIncluded>true</directoryIncluded>
-                                </mapping>
-                                <mapping>
-                                    <directory>/opt/ezbake/staging</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>755</filemode>
-                                    <directoryIncluded>true</directoryIncluded>
-                                </mapping>
-                                <mapping>
-                                    <directory>/opt/ezbake/staging/${project.artifactId}</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>755</filemode>
-                                    <directoryIncluded>true</directoryIncluded>
-                                </mapping>
-                                <mapping>
-                                    <directory>/opt/ezbake/staging/${project.artifactId}/config</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>755</filemode>
-				    <configuration/>
-                                    <directoryIncluded>true</directoryIncluded>
-                                </mapping>
-                                <mapping>
-                                    <directory>/opt/ezbake/staging/${project.artifactId}/config</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>640</filemode>
-                                    <directoryIncluded>false</directoryIncluded>
-                                    <sources>
-                                        <source>
-                                            <location>${project.build.scriptSourceDirectory}/config</location>
-                                        </source>
-                                    </sources>
-                                </mapping>
-                                <mapping>
-                                    <directory>/opt/ezbake/staging/${project.artifactId}</directory>
-                                    <username>ezbake</username>
-                                    <groupname>ezbake</groupname>
-                                    <filemode>644</filemode>
-                                    <directoryIncluded>false</directoryIncluded>
-                                    <sources>
-                                        <source><location>target/${project.artifactId}-${project.version}-jar-with-dependencies.jar</location></source>
-                                        <source><location>registration.yml</location></source>
-                                    </sources>
-                                </mapping>
-                            </mappings>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
