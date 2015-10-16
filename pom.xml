@@ -17,6 +17,7 @@
         <module>base-service</module>
         <module>ezblob</module>
         <module>ezelastic</module>
+        <module>ezhive</module>
         <module>ezgraph</module>
         <module>ezmongo</module>
         <module>ezpostgres</module>
