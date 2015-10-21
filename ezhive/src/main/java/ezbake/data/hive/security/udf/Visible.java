@@ -16,17 +16,21 @@ import org.slf4j.LoggerFactory;
 import org.apache.thrift.TException;
 
 public class Visible extends UDF {
-    public BooleanWritable evaluate(final Text visibility, String token, String path) {
+    public BooleanWritable evaluate(final Text visibility, 
+				    String token, 
+				    String path) {
 	ensureChecker(path);
 	boolean result = _evaluate(visibility, token);
 	return new BooleanWritable(result);
     }
 
-    public boolean _evaluate(final Text visibility, String token) {
+    private boolean _evaluate(final Text visibility, String token) {
 	if (token == null) { return false; } 
 	try {
-	    if (checker.check(deserializeFromBase64(EzSecurityToken.class, token),
-			      deserializeFromBase64(Visibility.class, visibility.toString()))){
+	    if (checker.check(deserializeFromBase64(EzSecurityToken.class,
+						    token),
+			      deserializeFromBase64(Visibility.class, 
+						    visibility.toString()))) {
 		logger.trace("token valid: {}", token);
 		return true;
 	    } else {
@@ -34,7 +38,8 @@ public class Visible extends UDF {
 		return false;
 	    }
 	} catch (TException e) {
-	    logger.error("Thrift connection", e);
+	    logger.error("trouble deserializing vis {} or token {}",
+			 visibility, token, e);
 	    return false;
 	}
     }
@@ -45,7 +50,9 @@ public class Visible extends UDF {
     private void ensureChecker(String path) {
 	Path[] p = new Path[]{FileSystems.getDefault().getPath(path)};
 	if (checker == null)
-	    checker = new VisibilityChecker(new EzbakeSecurityClient(ConfigUtils.getProperties(p)));
+	    checker = new VisibilityChecker(
+		        new EzbakeSecurityClient(
+			  ConfigUtils.getProperties(p)));
     }
 
     private VisibilityChecker checker = null;

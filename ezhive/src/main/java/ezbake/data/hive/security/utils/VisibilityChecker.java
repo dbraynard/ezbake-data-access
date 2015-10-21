@@ -33,17 +33,27 @@ public class VisibilityChecker {
 	if (!tok.isSetAuthorizations()) {
 	    logger.error("no authorizations set for token {}", tok);
 	    return false;
-	} else return true;
+	} else {
+	    logger.trace("authorizations are set for token {}", tok);
+	    return true;
+	}
     }
 
     private boolean hasReadPermission(Authorizations auths, Visibility vis) {
-	return evaluator.getPermissions(vis).contains(Permission.READ);
+	if (evaluator.getPermissions(vis).contains(Permission.READ)) {
+	    logger.trace("auths {} include READ-level permission", auths);
+	    return true;
+	} else {
+	    logger.trace("auths {} do not include READ-level permission", auths);
+	    return false;
+	}
     }
 
     private boolean validToken(EzSecurityToken token) {
+
 	// First, check to see if this token has already been seen. If
 	// it has, we only need to check its expiration.
-	if (lastValidToken != null && lastValidToken.equals(token) && !expired(token)) {
+	if (lastTok != null && lastTok.equals(token) && !expired(token)) {
 	    logger.trace("using cached token {}", token);
 	    return true;
 	}
@@ -60,9 +70,11 @@ public class VisibilityChecker {
 	}
 
 	// If all the checks pass, it's a valid token. Remember it.
-	lastValidToken = token;
+	logger.trace("token {} is valid. remembering it.", token);
+	lastTok = token;
 	setEvaluator(token.getAuthorizations());
 	return true;
+
     }
 
     //-----
@@ -70,22 +82,22 @@ public class VisibilityChecker {
     private boolean expired(EzSecurityToken token) {
 	if (token.isSetValidity()) {
 	    logger.error("token has no validity information: {}", token);
-	    return false;
+	    return true;
 	}
 
 	ValidityCaveats caveats = token.getValidity();
 
 	if (!caveats.isSetNotAfter()) {
 	    logger.error("token has no expiration date: {}", token);
-	    return false;
+	    return true;
 	}
 
 	if (caveats.getNotAfter() < System.currentTimeMillis()) {
 	    logger.error("token is expired: {}", token);
-	    return false;
+	    return true;
 	}
 
-	return true;
+	return false;
     }
 
     private void setEvaluator(Authorizations auths) {
@@ -95,7 +107,7 @@ public class VisibilityChecker {
     //-----
 
     private EzbakeSecurityClient securityClient;
-    private EzSecurityToken lastValidToken = null;
+    private EzSecurityToken lastTok = null;
     private PermissionEvaluator evaluator = null;
 
     //-----

@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>ezbake.data</groupId>
-        <artifactId>ezbake-data-access-ezelastic-parent</artifactId>
+        <artifactId>ezbake-data-access-parent</artifactId>
         <version>2.1</version>
     </parent>
 
@@ -83,13 +83,11 @@
 	<dependency>
 	  <groupId>org.slf4j</groupId>
 	  <artifactId>slf4j-api</artifactId>
-	  <version>${slf4j.version}</version>
 	  <scope>provided</scope>
 	</dependency>
 	<dependency>
 	  <groupId>org.slf4j</groupId>
 	  <artifactId>slf4j-log4j12</artifactId>
-	  <version>${slf4j.version}</version>
 	  <scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -161,28 +159,42 @@
             <artifactId>thrift-utils</artifactId>
         </dependency>
 
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>com.github.tlrx</groupId>
-            <artifactId>elasticsearch-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.elasticsearch</groupId>
-                    <artifactId>elasticsearch</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.carrotsearch</groupId>
-            <artifactId>junit-benchmarks</artifactId>
-            <scope>test</scope>
-        </dependency>
+	<!-- scala testing maven plugin -->
+	<dependency>
+	  <groupId>org.scalatest</groupId>
+	  <artifactId>scalatest-maven-plugin</artifactId>
+	</dependency>
+
+	<!-- scala testing framework -->
+	<dependency>
+	  <groupId>org.scalatest</groupId>
+	  <artifactId>${scalatest.artifact}</artifactId>
+	</dependency>
+
+	<!-- scala easymock extension -->
+	<dependency>
+	  <groupId>org.easymock</groupId>
+	  <artifactId>easymock</artifactId>
+	</dependency>
+	
     </dependencies>
 
 
     <build>
         <plugins>
+
+	    <!-- scala compiler for unit tests -->
+            <plugin>
+              <groupId>net.alchim31.maven</groupId>
+              <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- enable scalatest -->
+            <plugin>
+              <groupId>org.scalatest</groupId>
+              <artifactId>scalatest-maven-plugin</artifactId>
+            </plugin>
+	
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
