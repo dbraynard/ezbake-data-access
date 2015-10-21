@@ -32,15 +32,30 @@ class FilterHookSpec extends FunSpec
 
   describe("FilterHook") {
     it ("should add a visibility check to a select statement without a where clause") {
-      subject
-        .preAnalyze(mockContext(defaultConf), query())
-        .should(haveWhereClause(visCheck(defaultConf)))
+      withConf(defaultConf, {context =>
+        subject
+          .preAnalyze(context, query())
+          .should(haveWhereClause(visCheck(defaultConf)))
+      })
     }
   }
 
   //--------------------------------------------------------------------------------
 
   def subject = new FilterHook
+
+  //--------------------------------------------------------------------------------
+
+  def withConf(conf : FilterConf, test : HiveSemanticAnalyzerHookContext => Unit) {
+    val tup     = mockContext(defaultConf)
+    val conf    = tup._1
+    val context = tup._2
+
+    replay(conf)
+    replay(context)
+
+    test(context)
+  }
 
   //--------------------------------------------------------------------------------
 
@@ -96,7 +111,7 @@ class FilterHookSpec extends FunSpec
     conf   .get(   tokVar).andReturn(   fc.tok)
     conf   .get(  pathVar).andReturn(  fc.path)
 
-    context
+    (conf, context)
   }
 
   def top(tok : Int, name : String = null) =

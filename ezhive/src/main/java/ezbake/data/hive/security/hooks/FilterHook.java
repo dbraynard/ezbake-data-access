@@ -44,7 +44,7 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	dump(ast);
 	System.out.println("done dumping");
 	Configuration conf = context.getConf();
-	ASTNode newAst = rewriteAST(ast, 
+	ASTNode newAst = rewriteAST(ast,
 				    conf.get(VIS_FUNCTION_VAR), 
 				    conf.get(VIS_COL_VAR), 
 				    conf.get(TOK_VAR),
