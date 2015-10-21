@@ -62,7 +62,11 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	super.postAnalyze(context, rootTasks);
     }
 
-    private ASTNode rewriteAST(ASTNode ast, String function, String visCol, String token, String path) {
+    private ASTNode rewriteAST(ASTNode ast, 
+			       String function, 
+			       String visCol, 
+			       String token, 
+			       String path) {
 	// NOTE: We're modifying the ast in place. I think that's okay. -- Josh
 	ASTNode result = ast;
 
