@@ -31,7 +31,9 @@ import org.slf4j.LoggerFactory;
 
 public class FilterHook extends AbstractSemanticAnalyzerHook {
     private static final String TOK_VAR = "ezbake.token";
+    private static final String PATH_VAR = "ezbake.path";
     private static final String VIS_COL_VAR = "ezbake.visibility_column";
+    private static final String VIS_FUNCTION_VAR = "ezbake.visibility_function";
     private static final Logger LOG = LoggerFactory.getLogger(FilterHook.class);
 
     @Override
@@ -42,9 +44,11 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	dump(ast);
 	System.out.println("done dumping");
 	Configuration conf = context.getConf();
-	String token = conf.get(TOK_VAR);
-	String visCol = conf.get(VIS_COL_VAR);
-	ASTNode newAst = rewriteAST(ast, visCol, token);
+	ASTNode newAst = rewriteAST(ast, 
+				    conf.get(VIS_FUNCTION_VAR), 
+				    conf.get(VIS_COL_VAR), 
+				    conf.get(TOK_VAR),
+				    conf.get(PATH_VAR));
 	System.out.println("after rewrite");
 	dump(newAst);
 	System.out.println("done dumping after rewrite");
@@ -58,24 +62,24 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	super.postAnalyze(context, rootTasks);
     }
 
-    private ASTNode rewriteAST(ASTNode ast, String visCol, String token) {
+    private ASTNode rewriteAST(ASTNode ast, String function, String visCol, String token, String path) {
 	// NOTE: We're modifying the ast in place. I think that's okay. -- Josh
 	ASTNode result = ast;
 
 	switch (result.getToken().getType()) {
 	case HiveParser.TOK_SELECT:
-	    addClauseToSelect(result, visibilityAST(visCol, token));
-	    //addClauseToSelect(result, trueAST());
+	    addClauseToSelect(result, visibilityAST(function, visCol, token, path));
 	    break;
 	default:
-	    List<Node> children = ast.getChildren();
-	    if (children != null)
-		for (Node child : children)
-		    if (child instanceof ASTNode)
-			rewriteAST((ASTNode)child, visCol, token);
 	    break;
 	}
 	
+	List<Node> children = ast.getChildren();
+	if (children != null)
+	    for (Node child : children)
+		if (child instanceof ASTNode)
+		    rewriteAST((ASTNode)child, visCol, token, token, path);
+
 	return result;
     }
 
@@ -139,24 +143,16 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 
     private static final CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
 
-    private static ASTNode visibilityAST(String visCol, String token) {	
-	ASTNode eq = new ASTNode(new CommonToken(HiveParser.EQUAL, "="));
-	ASTNode lhs = new ASTNode(new CommonToken(HiveParser.TOK_TABLE_OR_COL));
-	ASTNode ident = new ASTNode(new CommonToken(HiveParser.Identifier, visCol));
-	ASTNode rhs = new ASTNode(new CommonToken(HiveParser.Number, token));
-	lhs.addChild(ident);
-	adaptor.addChild(eq, lhs);
-	adaptor.addChild(eq, rhs);
-	return eq;
-    }
+    private static ASTNode visibilityAST(String function, String visColName, String token, String path) {
+	ASTNode visCol = new ASTNode(new CommonToken(HiveParser.TOK_TABLE_OR_COL));
+	visCol.addChild(new ASTNode(new CommonToken(HiveParser.Identifier, visColName)));
 
-    // for testing purposes
-    // private static ASTNode trueAST(String visibility) {
-    // 	ASTNode eq = new ASTNode(new CommonToken(HiveParser.EQUAL, "="));
-    // 	ASTNode lhs = new ASTNode(new CommonToken(HiveParser.Number, "1"));
-    // 	ASTNode rhs = new ASTNode(new CommonToken(HiveParser.Number, "1"));
-    // 	adaptor.addChild(eq, lhs);
-    // 	adaptor.addChild(eq, rhs);
-    // 	return eq;
-    // }
+	ASTNode result = new ASTNode(new CommonToken(HiveParser.TOK_FUNCTION));
+	result.addChild(new ASTNode(new CommonToken(HiveParser.Identifier, function)));
+	result.addChild(visCol);
+	result.addChild(new ASTNode(new CommonToken(HiveParser.StringLiteral, token)));
+	result.addChild(new ASTNode(new CommonToken(HiveParser.StringLiteral, path)));
+
+	return result;
+    }
 }

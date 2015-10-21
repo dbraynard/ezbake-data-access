@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import ezbake.configuration.EzConfiguration;
 import ezbake.configuration.EzConfigurationLoaderException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class ConfigUtils {
@@ -31,7 +33,6 @@ public class ConfigUtils {
             configurationLoaders.add(new OpenShiftConfigurationLoader());
 
             for(Path p : additionalPaths) {
-		if (s.equals("")) continue;
                 configurationLoaders.add(new DirectoryConfigurationLoader(p));
             }
 
@@ -42,7 +43,5 @@ public class ConfigUtils {
             throw new RuntimeException(e);
         }
     }
-
-    private final String ADDITIONAL_CONFIG_DIR_PROP="ezbake.additional_config_dirs"
 }
 

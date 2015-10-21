@@ -154,6 +154,10 @@
         </dependency>
         <dependency>
             <groupId>ezbake</groupId>
+            <artifactId>ezbake-security-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ezbake</groupId>
             <artifactId>thrift-utils</artifactId>
         </dependency>
 
