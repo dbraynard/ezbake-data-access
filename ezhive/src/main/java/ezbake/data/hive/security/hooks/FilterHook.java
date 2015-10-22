@@ -28,6 +28,8 @@ import org.apache.hadoop.hive.ql.plan.HiveOperation;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static ezbake.data.hive.security.utils.ASTBuilder.top;
+import static ezbake.data.hive.security.utils.ASTBuilder.ast;
 
 public class FilterHook extends AbstractSemanticAnalyzerHook {
     private static final String TOK_VAR = "ezbake.token";
@@ -82,7 +84,7 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	if (children != null)
 	    for (Node child : children)
 		if (child instanceof ASTNode)
-		    rewriteAST((ASTNode)child, visCol, token, token, path);
+		    rewriteAST((ASTNode)child, function, visCol, token, path);
 
 	return result;
     }
@@ -99,7 +101,8 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	    curExpr.setParent(newExpr);
 	    whereClause.setChild(0, newExpr);
 	} else
-	    throw new RuntimeException("too many children in where clause? " + whereChildren.size() + " children");
+	    throw new RuntimeException("too many children in where clause? " +
+				       whereChildren.size() + " children");
     }
 
     private ASTNode whereClauseFromSelect(ASTNode select) {
@@ -148,15 +151,11 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
     private static final CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
 
     private static ASTNode visibilityAST(String function, String visColName, String token, String path) {
-	ASTNode visCol = new ASTNode(new CommonToken(HiveParser.TOK_TABLE_OR_COL));
-	visCol.addChild(new ASTNode(new CommonToken(HiveParser.Identifier, visColName)));
-
-	ASTNode result = new ASTNode(new CommonToken(HiveParser.TOK_FUNCTION));
-	result.addChild(new ASTNode(new CommonToken(HiveParser.Identifier, function)));
-	result.addChild(visCol);
-	result.addChild(new ASTNode(new CommonToken(HiveParser.StringLiteral, token)));
-	result.addChild(new ASTNode(new CommonToken(HiveParser.StringLiteral, path)));
-
-	return result;
+	return ast(top("TOK_FUNCTION"),
+		   ast(top("Identifier", function)),
+		   ast(top("TOK_TABLE_OR_COL"),
+		       ast(top("Identifier", visColName))),
+		   ast(top("StringLiteral", token)),
+		   ast(top("StringLiteral", path)));
     }
 }

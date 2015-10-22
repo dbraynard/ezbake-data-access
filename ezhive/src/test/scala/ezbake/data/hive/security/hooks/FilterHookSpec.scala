@@ -5,7 +5,7 @@ import org.easymock.EasyMock
 import org.easymock.EasyMock._
 
 import scala.collection.mutable.Stack
-import scala.collection.JavaConversions._
+import scala.collection.convert.wrapAll._
 
 import org.scalatest.{PrivateMethodTester,FunSpec}
 import org.scalatest.matchers.{Matcher,MatchResult,ShouldMatchers}
@@ -25,6 +25,7 @@ import org.apache.hadoop.hive.ql.parse.{ASTNode,HiveParser,HiveSemanticAnalyzerH
 import org.apache.hadoop.conf.Configuration
 import scala.language.implicitConversions
 import ezbake.data.hive.security.utils.ASTBuilder.{top,ast}
+import org.apache.hadoop.hive.ql.lib.Node
 
 class FilterHookSpec extends FunSpec
     with ShouldMatchers
@@ -72,15 +73,14 @@ class FilterHookSpec extends FunSpec
       val extractedString = extracted match { case Some(s) => s.dump; case None => "None" }
       MatchResult(
         extracted match {
-          case Some(w) => expected.equals(whereClauseOf(w))
+          case Some(w) => nodesEquivalent(expected, w)
           case None => false
         },
         s"""expected --- ${expected.dump} --- but --- ${s.dump} --- contained --- ${extractedString} """,
         s"""${s.dump} contained where clause ${expected.dump}""")
     }
 
-    def whereClauseOf(s : ASTNode) : Option[ASTNode] = {
-      println("token! " + s.getToken())
+    def whereClauseOf(s : ASTNode) : Option[ASTNode] =
       if (s.getToken.getType == HiveParser.TOK_WHERE)
         Some(s)
       else if (s.getChildren != null) 
@@ -90,10 +90,24 @@ class FilterHookSpec extends FunSpec
         }).flatten.headOption
       else
         None
-    }
   }
 
   def haveWhereClause(w : ASTNode) = new HasWhereClauseMatcher(w)
+
+  //--------------------------------------------------------------------------------
+
+  def nodesEquivalent(n1 : Node, n2 : Node) : Boolean = 
+    n1.getClass.getName.equals(n2.getClass.getName) &&
+    ((n1,n2) match {
+      case (a1 : ASTNode, a2 : ASTNode) => astsEquivalent(a1, a2)
+      case _ => n1.equals(n2)
+    })
+
+  def astsEquivalent(n1 : ASTNode, n2 : ASTNode) : Boolean =
+    n1.getToken().getType() == n2.getToken().getType() &&
+    n1.getToken().getText() == n2.getToken().getText() &&
+    ((n1.getChildren == null) && (n2.getChildren == null)) ||
+    (n1.getChildren.zip(n2.getChildren).forall(c => nodesEquivalent(c._1,c._2)))
 
   //--------------------------------------------------------------------------------
 
