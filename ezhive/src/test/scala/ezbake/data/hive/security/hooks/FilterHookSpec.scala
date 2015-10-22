@@ -32,10 +32,9 @@ class FilterHookSpec extends FilterHookAux {
   describe("FilterHook") {
     it ("should add a visibility check to a select statement without a where clause") {
       withConf(defaultConf, {context =>
-        val x = subject
+        subject
           .preAnalyze(context, query())
-        println(x)
-          x.should(haveWhereClause(visCheck(defaultConf)))
+          .should(haveWhereClause(visCheck(defaultConf)))
       })
     }
   }

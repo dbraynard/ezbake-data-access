@@ -32,28 +32,18 @@ import static ezbake.data.hive.security.utils.ASTBuilder.top;
 import static ezbake.data.hive.security.utils.ASTBuilder.ast;
 
 public class FilterHook extends AbstractSemanticAnalyzerHook {
-    private static final String TOK_VAR = "ezbake.token";
-    private static final String PATH_VAR = "ezbake.path";
-    private static final String VIS_COL_VAR = "ezbake.visibility_column";
-    private static final String VIS_FUNCTION_VAR = "ezbake.visibility_function";
-    private static final Logger LOG = LoggerFactory.getLogger(FilterHook.class);
-
     @Override
     public ASTNode preAnalyze(HiveSemanticAnalyzerHookContext context, 
 			      ASTNode ast)
 	throws SemanticException {
-	System.out.println("before rewrite");
-	dump(ast);
-	System.out.println("done dumping");
+	logger.debug("about to rewrite ast: ----- {} -----", ast.dump());
 	Configuration conf = context.getConf();
 	ASTNode newAst = rewriteAST(ast,
 				    conf.get(VIS_FUNCTION_VAR), 
 				    conf.get(VIS_COL_VAR), 
 				    conf.get(TOK_VAR),
 				    conf.get(PATH_VAR));
-	System.out.println("after rewrite");
-	dump(newAst);
-	System.out.println("done dumping after rewrite");
+	logger.debug("done rewriting ast: ----- {} -----", newAst.dump());
 	return super.preAnalyze(context, newAst);
     }
     
@@ -63,6 +53,9 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	throws SemanticException {
 	super.postAnalyze(context, rootTasks);
     }
+
+    //-----
+    // top-level utility function
 
     private ASTNode rewriteAST(ASTNode ast, 
 			       String function, 
@@ -89,6 +82,9 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	return result;
     }
 
+    //-----
+    // ast mutation
+
     private void addClauseToSelect(ASTNode select, ASTNode expr) {
 	ASTNode whereClause = whereClauseFromSelect(select);
 
@@ -101,7 +97,7 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	    curExpr.setParent(newExpr);
 	    whereClause.setChild(0, newExpr);
 	} else
-	    throw new RuntimeException("too many children in where clause? " +
+	    throw new RuntimeException("expected fewer children in where clause! " +
 				       whereChildren.size() + " children");
     }
 
@@ -123,19 +119,8 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	throw new RuntimeException("select clause has no parent!");
     }
 
-
-    private void dump(ASTNode ast) { dump(ast, 0); }
-
-    private void dump(ASTNode ast, int indent) {
-	for (int i = 0; i < indent; i++) System.out.print("  ");
-	System.out.println(ast.getToken().getText() + " : " + ast.getToken().getType());
-
-	List<Node> children = ast.getChildren();
-	if (children != null)
-	    for (Node n : children)
-		if (n != null && n instanceof ASTNode)
-		    dump((ASTNode)n, indent + 1);
-    }
+    //-----
+    // ast creation
 
     static ASTNode andAST(ASTNode left, ASTNode right) {
 	if (left == null) return right;
@@ -148,9 +133,10 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 	}
     }
 
-    private static final CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
-
-    private static ASTNode visibilityAST(String function, String visColName, String token, String path) {
+    private static ASTNode visibilityAST(String function, 
+					 String visColName, 
+					 String token, 
+					 String path) {
 	return ast(top("TOK_FUNCTION"),
 		   ast(top("Identifier", function)),
 		   ast(top("TOK_TABLE_OR_COL"),
@@ -158,4 +144,14 @@ public class FilterHook extends AbstractSemanticAnalyzerHook {
 		   ast(top("StringLiteral", token)),
 		   ast(top("StringLiteral", path)));
     }
+
+    //----
+
+    private static final String TOK_VAR = "ezbake.token";
+    private static final String PATH_VAR = "ezbake.path";
+    private static final String VIS_COL_VAR = "ezbake.visibility_column";
+    private static final String VIS_FUNCTION_VAR = "ezbake.visibility_function";
+    private static final Logger logger = LoggerFactory.getLogger(FilterHook.class);
+    private static final CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
+
 }
