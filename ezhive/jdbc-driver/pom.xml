@@ -6,7 +6,7 @@
         <artifactId>ezbake-data-access-ezhive-parent</artifactId>
         <version>2.1</version>
     </parent>
-    <artifactId>ezbake-jdbc-driver</artifactId>
+    <artifactId>ezbake-hive-jdbc-driver</artifactId>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
