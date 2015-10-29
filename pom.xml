@@ -21,7 +21,8 @@
         <module>ezgraph</module>
         <module>ezmongo</module>
         <module>ezpostgres</module>
-        <module>utils</module>
+        <module>utils</module>        
+        <module>ezjdbc</module>
     </modules>
 
     <properties>
